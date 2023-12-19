@@ -1,0 +1,11 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/Working.Notes/.vs/Working.Notes
+/Working.Notes/SendEmail/bin/Debug/net8.0
+/Working.Notes/SendEmail/obj
+/Working.Notes/Working.Tools/bin/Debug/net8.0
+/Working.Notes/Working.Tools/obj
+.vs
+bin
