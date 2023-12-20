@@ -1,10 +1,11 @@
-﻿using NPOI.SS.UserModel;
+﻿using NPOI.HSSF.Util;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using Working.Tools.AttributeExpand;
+
 
 
 namespace Working.Tools
@@ -132,8 +133,9 @@ namespace Working.Tools
         /// </summary>
         /// <param name="dataTable">要导入的 DataTable</param>
         /// <param name="saveFullPath">保存文件的完整路径</param>
+        /// <param name="title">标题内容</param>
         /// <param name="sheetName">工作表名称，默认为 "Sheet1"</param>
-        public static void ImportExcel(this DataTable dataTable, string saveFullPath, string sheetName = "Sheet1")
+        public static void ImportExcel(this DataTable dataTable, string saveFullPath, string title, string sheetName = "Sheet1")
         {
             FileHelper.CreateDirectoryPath(Path.GetDirectoryName(saveFullPath));
 
@@ -142,22 +144,50 @@ namespace Working.Tools
 
             ISheet sheet = workbook.CreateSheet(sheetName); // 创建工作表，名称为 "Sheet1"
 
+
+            // 设置标题样式
+            var cellStyleFont = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 20, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Coral.Index, HSSFColor.White.Index,
+                    FontUnderlineType.None, FontSuperScript.None, false);
+
+
+            //第一行表单
+            var row = ExcelHelper.CreateRow(sheet, 0, 28);
+            var cell = row.CreateCell(0);
+            CellRangeAddress region = new CellRangeAddress(0, 0, 0, 20);
+            sheet.AddMergedRegion(region);
+            cell.SetCellValue(title);//合并单元格后，只需对第一个位置赋值即可（TODO:顶部标题）
+            cell.CellStyle = cellStyleFont;
+
+            //二级标题列样式设置
+            var headTopStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 15, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Grey25Percent.Index, HSSFColor.Black.Index,
+            FontUnderlineType.None, FontSuperScript.None, false);
+
+            row = ExcelHelper.CreateRow(sheet, 1, 28);
             // 写入表头
-            IRow headerRow = sheet.CreateRow(0);
             for (int i = 0; i < dataTable.Columns.Count; i++)
             {
-                headerRow.CreateCell(i).SetCellValue(dataTable.Columns[i].ColumnName);
+
+                cell = ExcelHelper.CreateCells(row, headTopStyle, i, dataTable.Columns[i].ColumnName);
+                sheet.SetColumnWidth(i, 5000);
             }
+
+
+            // 设置数据行样式
+            var cellStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 10, true, 400);
+
 
             // 写入数据
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
-                IRow dataRow = sheet.CreateRow(i + 1);
+                row = ExcelHelper.CreateRow(sheet, i + 2, 20); //sheet.CreateRow(i+2);//在上面表头的基础上创建行
                 for (int j = 0; j < dataTable.Columns.Count; j++)
                 {
-                    dataRow.CreateCell(j).SetCellValue(dataTable.Rows[i][j].ToString());
+                    cell = ExcelHelper.CreateCells(row, cellStyle, j, dataTable.Rows[i][j].ToString());
+                    //cell.SetCellValue(dataTable.Rows[i][j].ToString());
+                    //cell.CellStyle = dataStyle;
                 }
             }
+
 
             using (FileStream fs = new FileStream(saveFullPath, FileMode.Create))
             {

@@ -8,17 +8,17 @@ namespace SendEmail
     {
         static async Task Main(string[] args)
         {
-            //var dt = CreateDataTable();
-            //dt.ImportExcel("c:\\ImportExcel\\Test.xlsx");
+            var dt = CreateDataTable();
+            dt.ImportExcel("c:\\ImportExcel\\Test.xlsx","导出测试");
 
-            var columnValidators = new Dictionary<string, Func<object, bool>>
-              {
-                  { "Age", value => Convert.ToInt32(value) < 31 },
+            //var columnValidators = new Dictionary<string, Func<object, bool>>
+            //  {
+            //      { "Age", value => Convert.ToInt32(value) < 31 },
                   
-                   // 添加更多的列和验证函数
-               };
-            var dt1 = ExcelHelper.ImportExcel("c:\\ImportExcel\\Test.xlsx");
-            var list = CreateDataTable().ToObjectList<Test>();
+            //       // 添加更多的列和验证函数
+            //   };
+            //var dt1 = ExcelHelper.ImportExcel("c:\\ImportExcel\\Test.xlsx");
+            //var list = CreateDataTable().ToObjectList<Test>();
         }
 
 
