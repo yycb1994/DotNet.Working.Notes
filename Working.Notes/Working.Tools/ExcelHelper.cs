@@ -15,8 +15,11 @@ namespace Working.Tools
         #region 导入 Excel 文件并返回 DataTable 对象。
         /// <summary>
         /// 导入 Excel 文件并返回 DataTable 对象。
-        /// </summary>
-        ///<remarks>
+        /// </summary>       
+        /// <param name="filePath">Excel 文件路径。</param>
+        /// <param name="columnValidators">要应用的列值验证器的字典。</param>
+        /// <returns>导入的数据表。</returns>
+        /// <remarks>
         ///调用示例 :
         ///     var columnValidators = new Dictionary<string, Func<object, bool>>
         ///     {
@@ -26,10 +29,7 @@ namespace Working.Tools
         ///      };
         ///     var dataTable = ExcelImporter.ImportExcel(filePath, columnValidators);
         /// </remarks>
-        /// <param name="filePath">Excel 文件路径。</param>
-        /// <param name="columnValidators">要应用的列值验证器的字典。</param>
-        /// <returns>导入的数据表。</returns>
-        public static DataTable ImportExcel(string filePath, Dictionary<string, Func<object, bool>> columnValidators)
+        public static DataTable ImportExcel(string filePath, Dictionary<string, Func<object, bool>> columnValidators = null)
         {
             if (!File.Exists(filePath))
             {
@@ -78,21 +78,24 @@ namespace Working.Tools
                         dataRow[col] = cellValue;
                     }
 
-                    // 验证特定列的值
-                    foreach (var columnValidator in columnValidators)
+                    if (columnValidators!=null)
                     {
-                        var columnName = columnValidator.Key;
-                        var validator = columnValidator.Value;
-
-                        var columnValue = dataRow[columnName];
-                        if (columnValue != null && columnValue != DBNull.Value)
+                        // 验证特定列的值
+                        foreach (var columnValidator in columnValidators)
                         {
-                            if (!validator(columnValue))
+                            var columnName = columnValidator.Key;
+                            var validator = columnValidator.Value;
+
+                            var columnValue = dataRow[columnName];
+                            if (columnValue != null && columnValue != DBNull.Value)
                             {
-                                throw new Exception($"第 {row + 1} 行的 {columnName} 列的值不符合要求。");
+                                if (!validator(columnValue))
+                                {
+                                    throw new Exception($"第 {row + 1} 行的 {columnName} 列的值不符合要求。");
+                                }
                             }
                         }
-                    }
+                    }                  
 
                     dataTable.Rows.Add(dataRow);
                 }
@@ -126,7 +129,7 @@ namespace Working.Tools
                 default:
                     return DBNull.Value;
             }
-        } 
+        }
         #endregion
     }
 }

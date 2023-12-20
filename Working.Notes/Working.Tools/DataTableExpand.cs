@@ -3,6 +3,8 @@ using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
+using Working.Tools.AttributeExpand;
 
 
 namespace Working.Tools
@@ -99,17 +101,22 @@ namespace Working.Tools
 
                     foreach (var property in typeof(TModel).GetProperties())
                     {
-                        if (dataTable.Columns.Contains(property.Name))
+                        var attribute = property.GetCustomAttribute<DataTableFieldNameAttribute>();
+                        var columnName = attribute?.ColumnName ?? property.Name;
+
+                        if (dataTable.Columns.Contains(columnName))
                         {
-                            var value = row[property.Name];
+                            var value = row[columnName];
                             if (value != DBNull.Value)
                             {
                                 property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
                             }
                         }
                     }
+
                     objectList.Add(obj);
                 }
+
                 return objectList;
             }
             catch (Exception ex)
@@ -117,6 +124,7 @@ namespace Working.Tools
                 throw new Exception("DataTable转换失败:", ex);
             }
         }
+
 
 
         /// <summary>
@@ -127,6 +135,8 @@ namespace Working.Tools
         /// <param name="sheetName">工作表名称，默认为 "Sheet1"</param>
         public static void ImportExcel(this DataTable dataTable, string saveFullPath, string sheetName = "Sheet1")
         {
+            FileHelper.CreateDirectoryPath(Path.GetDirectoryName(saveFullPath));
+
             IWorkbook workbook = new XSSFWorkbook(); // 创建 .xlsx 文件
                                                      // IWorkbook workbook = new HSSFWorkbook(); // 创建 .xls 文件
 
