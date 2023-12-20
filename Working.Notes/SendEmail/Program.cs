@@ -4,11 +4,12 @@ namespace SendEmail
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            CustomizedTimer  customizedTimer = new CustomizedTimer();
-            customizedTimer.CreateDailyScheduledTasks(() => { Console.WriteLine("你好"); },18);
+            //CustomizedTimer  customizedTimer = new CustomizedTimer();
+            //customizedTimer.CreateDailyScheduledTasks(() => { Console.WriteLine("你好"); },18);
 
+            var d = await HttpHelper.GetFileContent("http://www.baidu.com", HttpMethod.Get);
         }
     }
 }
