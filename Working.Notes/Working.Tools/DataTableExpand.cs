@@ -2,7 +2,9 @@
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
+using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using Working.Tools.AttributeExpand;
 
@@ -126,7 +128,61 @@ namespace Working.Tools
             }
         }
 
+        /// <summary>
+        /// 将泛型集合类转换成DataTable
+        /// </summary>
+        /// <typeparam name="T">集合项类型</typeparam>
+        /// <param name="list">集合</param>
+        /// <param name="tableName">表名</param>
+        /// <returns>数据集(表)</returns>
+        public static DataTable ToDataTable<T>(this IList<T> list, string tableName = null)
+        {
+            var result = new DataTable(tableName);
 
+            if (list.Count == 0)
+            {
+                return result;
+            }
+
+            var properties = typeof(T).GetProperties();
+            result.Columns.AddRange(properties.Select(p =>
+            {
+                var columnType = p.PropertyType;
+                if (columnType.IsGenericType && columnType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    columnType = Nullable.GetUnderlyingType(columnType);
+                }
+                return new DataColumn(p.GetCustomAttribute<DataTableFieldNameAttribute>()?.ColumnName ?? p.Name, columnType);
+            }).ToArray());
+
+            list.ToList().ForEach(item => result.Rows.Add(properties.Select(p => p.GetValue(item)).ToArray()));
+
+            return result;
+        }
+
+        /// <summary>
+        /// 给DataTable增加一个自增列
+        /// 如果DataTable 存在 identityid 字段  则 直接返回DataTable 不做任何处理
+        /// </summary>
+        /// <param name="dt">DataTable</param>
+        /// <returns>返回Datatable 增加字段 identityid </returns>
+        public static DataTable AddIdentityColumn(this DataTable dt,string columnName= "identityid")
+        {
+            if (!dt.Columns.Contains(columnName))
+            {
+                DataColumn identityColumn = new DataColumn(columnName);
+                dt.Columns.Add(identityColumn);
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    dt.Rows[i][columnName] = (i + 1).ToString();
+                }
+
+                dt.Columns[columnName].SetOrdinal(0); // 将列排在第一位
+            }
+
+            return dt;
+        }
 
         /// <summary>
         /// 将 DataTable 导入到 Excel 文件
