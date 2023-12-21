@@ -166,7 +166,7 @@ namespace Working.Tools
         /// </summary>
         /// <param name="dt">DataTable</param>
         /// <returns>返回Datatable 增加字段 identityid </returns>
-        public static DataTable AddIdentityColumn(this DataTable dt,string columnName= "identityid")
+        public static DataTable AddIdentityColumn(this DataTable dt, string columnName = "identityid")
         {
             if (!dt.Columns.Contains(columnName))
             {
@@ -191,7 +191,7 @@ namespace Working.Tools
         /// <param name="saveFullPath">保存文件的完整路径</param>
         /// <param name="title">标题内容</param>
         /// <param name="sheetName">工作表名称，默认为 "Sheet1"</param>
-        public static void ImportExcel(this DataTable dataTable, string saveFullPath, string title, string sheetName = "Sheet1")
+        public static void ImportExcel(this DataTable dataTable, string saveFullPath, string title, ICellStyle titleStyle = null, ICellStyle headTopStyle = null, ICellStyle cellStyle = null, string sheetName = "Sheet1")
         {
             FileHelper.CreateDirectoryPath(Path.GetDirectoryName(saveFullPath));
 
@@ -201,9 +201,9 @@ namespace Working.Tools
             ISheet sheet = workbook.CreateSheet(sheetName); // 创建工作表，名称为 "Sheet1"
 
 
-            // 设置标题样式
-            var cellStyleFont = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 20, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Coral.Index, HSSFColor.White.Index,
-                    FontUnderlineType.None, FontSuperScript.None, false);
+            //// 设置标题样式
+            //var cellStyleFont = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 20, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Coral.Index, HSSFColor.White.Index,
+            //        FontUnderlineType.None, FontSuperScript.None, false);
 
 
             //第一行表单
@@ -212,11 +212,11 @@ namespace Working.Tools
             CellRangeAddress region = new CellRangeAddress(0, 0, 0, 20);
             sheet.AddMergedRegion(region);
             cell.SetCellValue(title);//合并单元格后，只需对第一个位置赋值即可（TODO:顶部标题）
-            cell.CellStyle = cellStyleFont;
+            cell.CellStyle = titleStyle;
 
             //二级标题列样式设置
-            var headTopStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 15, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Grey25Percent.Index, HSSFColor.Black.Index,
-            FontUnderlineType.None, FontSuperScript.None, false);
+            //var headTopStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 15, true, 700, "楷体", true, false, false, true, FillPattern.SolidForeground, HSSFColor.Grey25Percent.Index, HSSFColor.Black.Index,
+            //FontUnderlineType.None, FontSuperScript.None, false);
 
             row = ExcelHelper.CreateRow(sheet, 1, 28);
             // 写入表头
@@ -229,7 +229,7 @@ namespace Working.Tools
 
 
             // 设置数据行样式
-            var cellStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 10, true, 400);
+            //var cellStyle = ExcelHelper.CreateStyle(workbook, HorizontalAlignment.Center, VerticalAlignment.Center, 10, true, 400);
 
 
             // 写入数据

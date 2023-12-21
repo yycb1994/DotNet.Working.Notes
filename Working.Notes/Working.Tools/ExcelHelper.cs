@@ -79,7 +79,7 @@ namespace Working.Tools
                         dataRow[col] = cellValue;
                     }
 
-                    if (columnValidators!=null)
+                    if (columnValidators != null)
                     {
                         // 验证特定列的值
                         foreach (var columnValidator in columnValidators)
@@ -96,7 +96,7 @@ namespace Working.Tools
                                 }
                             }
                         }
-                    }                  
+                    }
 
                     dataTable.Rows.Add(dataRow);
                 }
@@ -161,9 +161,13 @@ namespace Working.Tools
         /// <returns></returns>
         public static ICell CreateCells(IRow row, ICellStyle cellStyle, int cellNum, string cellValue)
         {
-           
-            var  cell = row.CreateCell(cellNum); //创建单元格
-            cell.CellStyle = cellStyle; //将样式绑定到单元格
+
+            var cell = row.CreateCell(cellNum); //创建单元格
+            if (cellStyle!=null)
+            {
+                cell.CellStyle = cellStyle; //将样式绑定到单元格
+            }
+            
             if (!string.IsNullOrWhiteSpace(cellValue))
             {
                 //单元格赋值
@@ -197,7 +201,7 @@ namespace Working.Tools
         /// <returns></returns>
         public static ICellStyle CreateStyle(IWorkbook workbook, HorizontalAlignment hAlignment, VerticalAlignment vAlignment, short fontHeightInPoints, bool isAddBorder, short boldWeight, string fontName = "宋体", bool isAddBorderColor = true, bool isItalic = false, bool isLineFeed = false, bool isAddCellBackground = false, FillPattern fillPattern = FillPattern.NoFill, short cellBackgroundColor = HSSFColor.Yellow.Index, short fontColor = HSSFColor.Black.Index, FontUnderlineType underlineStyle =
             FontUnderlineType.None, FontSuperScript typeOffset = FontSuperScript.None, bool isStrikeout = false)
-        {           
+        {
             var cellStyle = workbook.CreateCellStyle(); //创建列头单元格实例样式
             cellStyle.Alignment = hAlignment; //水平居中
             cellStyle.VerticalAlignment = vAlignment; //垂直居中
