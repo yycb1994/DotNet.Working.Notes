@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using RestSharp;
+using System.Data;
+using Working.Tools;
 using Working.Tools.AttributeExpand;
 
 namespace ConsoleApp1
@@ -7,8 +9,15 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            var dt = CreateDataTable();
-            dt.ImportExcel("c:\\ImportExcel\\Test.xlsx", "导出测试");
+
+            #region HttpHelper Call Example
+            //var requestbody = new RestRequest();
+            //var result = HttpHelper.HttpRequest("http://www.baidu.com", RestSharp.Method.Get, requestbody); 
+            #endregion
+
+            #region ExcelHelper Call Example
+            //var dt = CreateDataTable();
+            //dt.ImportExcel("c:\\ImportExcel\\Test.xlsx", "导出测试");
 
             //var columnValidators = new Dictionary<string, Func<object, bool>>
             //  {
@@ -17,7 +26,8 @@ namespace ConsoleApp1
             //       // 添加更多的列和验证函数
             //   };
             //var dt1 = ExcelHelper.ImportExcel("c:\\ImportExcel\\Test.xlsx");
-            //var list = CreateDataTable().ToObjectList<Test>();
+            //var list = CreateDataTable().ToObjectList<Test>(); 
+            #endregion
         }
 
         static DataTable CreateDataTable()
