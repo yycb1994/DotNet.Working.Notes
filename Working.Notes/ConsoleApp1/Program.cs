@@ -10,6 +10,21 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
 
+            #region EmailSender Call Example 支持抄送
+            //string smtpServer = "smtp.qq.com"; // 或者 "smtp.163.com"  
+            //int smtpPort = 587; // 根据SMTP服务器配置更改这个值  网易邮箱端口 25
+            //string senderName = "89085824@qq.com"; // 发件人邮箱地址  
+            //string senderPassword = "mzodpkjdipvabgibc"; // 发件人邮箱密码  
+            //string recipientEmail = "13200813451@163.com"; // 收件人邮箱地址  
+            //string cCEmail = "13200813451@163.com"; // 抄送人邮箱地址  
+            //string subjectPrefix = $"{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}  测试邮件标题";// 邮件主题前缀，可以根据需要更改这个值  
+            //string attachmentFilePath = ""; // 附件文件路径，根据需要更改这个值  
+            //string emailContext = $"{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}  测试邮件内容";
+
+            //EmailSender emailSender = new EmailSender(smtpServer, smtpPort, senderName, senderPassword, subjectPrefix, emailContext);
+            //emailSender.SendMail(recipientEmail, cCEmail, attachmentFilePath); // 替换为你需要发送的邮件内容和文件路径，包括附件和图片的路径 
+            #endregion
+
             #region HttpHelper Call Example
             //var requestbody = new RestRequest();
             //var result = HttpHelper.HttpRequest("http://www.baidu.com", RestSharp.Method.Get, requestbody); 
