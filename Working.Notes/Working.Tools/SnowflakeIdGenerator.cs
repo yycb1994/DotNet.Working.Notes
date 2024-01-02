@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Working.Tools
+﻿namespace Working.Tools
 {
 
     /// <summary>

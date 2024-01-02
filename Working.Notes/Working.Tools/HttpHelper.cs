@@ -1,11 +1,5 @@
-﻿using MathNet.Numerics.LinearAlgebra.Factorization;
-using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using RestSharp;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Working.Tools
 {
