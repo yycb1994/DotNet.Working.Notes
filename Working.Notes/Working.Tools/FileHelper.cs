@@ -167,7 +167,18 @@ namespace Working.Tools
                 DeleteFolderContents(directoryPath);
             }
             return directoryPath;
-        } 
+        }
         #endregion
+
+        /// <summary>
+        /// 将给定的字节数组保存为指定路径下的文件。
+        /// </summary>
+        /// <param name="bytes">要保存为文件的字节数组。</param>
+        /// <param name="saveFileFullPath">要保存文件的完整路径。</param>
+        public static void SaveFile(byte[] bytes, string saveFileFullPath)
+        {
+            File.WriteAllBytes(saveFileFullPath, bytes);
+        }
+
     }
 }

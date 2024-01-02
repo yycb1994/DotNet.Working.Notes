@@ -260,7 +260,7 @@ namespace Working.Tools
         /// <param name="pageSize"></param>
         /// <param name="numberOfPages"></param>
         /// <param name="dataSource">数据源</param>
-        public static void AddPageBreaks(string inputFilePath, string outputFilePath, int pageSize, int numberOfPages, DataTable? dataSource=null)
+        public static void AddPageBreaks(string inputFilePath, string outputFilePath, int pageSize, int numberOfPages)
         {
             IWorkbook workbook;
             // 打开一个文件流来读取Excel文件
@@ -371,5 +371,56 @@ namespace Working.Tools
             }
 
         }
+
+
+        public static void AddPageBreaks1(string inputFilePath, string outputFilePath, int pageSize, int numberOfPages)
+        {
+            IWorkbook workbook;
+            // 打开一个文件流来读取Excel文件
+            using (FileStream file = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
+            {
+                // 根据文件扩展名决定使用哪个类来处理Excel文件
+                if (Path.GetExtension(inputFilePath).ToLower() == ".xlsx")
+                    workbook = new XSSFWorkbook(file);
+                else
+                    workbook = new HSSFWorkbook(file);
+            }
+
+            // 获取Excel文件的第一个工作表
+            ISheet sheet = workbook.GetSheetAt(0);
+
+            // 设置每页的行数
+            int rowsPerPage = pageSize;
+
+            // 循环复制内容并添加分页符
+            for (int i = 1; i < numberOfPages; i++)
+            {
+                // 计算分页符的位置，即每一页结束的地方
+                int pageBreakRow = i * rowsPerPage - 1;
+                // 在该位置添加分页符
+                sheet.SetRowBreak(pageBreakRow);
+
+                // 计算新一页内容开始的行号
+                int startRow = pageBreakRow + 1;
+
+                // 复制第一页的内容到新的一页
+                for (int j = 0; j < rowsPerPage; j++)
+                {
+                    // 获取源行，即第一页的行
+                    IRow sourceRow = sheet.GetRow(j);
+                    // 检查是否超出了工作表的现有行数，如果是，则创建新行
+                    IRow targetRow = sheet.GetRow(startRow + j) ?? sheet.CreateRow(startRow + j);
+                    // 调用复制行的方法来复制源行到目标行
+                    CopyRow(workbook, sourceRow, targetRow);
+                }
+            }
+
+          
+
+            // 打开保存后的文件，前提是系统关联了Excel程序来打开.xls文件
+            // System.Diagnostics.Process.Start(outputFilePath);
+        }
+
+
     }
 }
