@@ -79,7 +79,7 @@ namespace Working.Tools
                         dataRow[col] = cellValue;
                     }
 
-                    if (columnValidators!=null)
+                    if (columnValidators != null)
                     {
                         // 验证特定列的值
                         foreach (var columnValidator in columnValidators)
@@ -96,7 +96,7 @@ namespace Working.Tools
                                 }
                             }
                         }
-                    }                  
+                    }
 
                     dataTable.Rows.Add(dataRow);
                 }
@@ -133,10 +133,6 @@ namespace Working.Tools
         }
         #endregion
 
-
-
-
-
         /// <summary>
         /// TODO:先创建行，然后在创建对应的列
         /// 创建Excel中指定的行
@@ -161,9 +157,13 @@ namespace Working.Tools
         /// <returns></returns>
         public static ICell CreateCells(IRow row, ICellStyle cellStyle, int cellNum, string cellValue)
         {
-           
-            var  cell = row.CreateCell(cellNum); //创建单元格
-            cell.CellStyle = cellStyle; //将样式绑定到单元格
+
+            var cell = row.CreateCell(cellNum); //创建单元格
+            if (cellStyle != null)
+            {
+                cell.CellStyle = cellStyle; //将样式绑定到单元格
+            }
+
             if (!string.IsNullOrWhiteSpace(cellValue))
             {
                 //单元格赋值
@@ -197,7 +197,7 @@ namespace Working.Tools
         /// <returns></returns>
         public static ICellStyle CreateStyle(IWorkbook workbook, HorizontalAlignment hAlignment, VerticalAlignment vAlignment, short fontHeightInPoints, bool isAddBorder, short boldWeight, string fontName = "宋体", bool isAddBorderColor = true, bool isItalic = false, bool isLineFeed = false, bool isAddCellBackground = false, FillPattern fillPattern = FillPattern.NoFill, short cellBackgroundColor = HSSFColor.Yellow.Index, short fontColor = HSSFColor.Black.Index, FontUnderlineType underlineStyle =
             FontUnderlineType.None, FontSuperScript typeOffset = FontSuperScript.None, bool isStrikeout = false)
-        {           
+        {
             var cellStyle = workbook.CreateCellStyle(); //创建列头单元格实例样式
             cellStyle.Alignment = hAlignment; //水平居中
             cellStyle.VerticalAlignment = vAlignment; //垂直居中
@@ -250,5 +250,177 @@ namespace Working.Tools
             cellStyle.SetFont(cellStyleFont); //将字体绑定到样式
             return cellStyle;
         }
+
+        /// <summary>
+        /// 一个用来添加分页符的函数
+        /// 每隔pageSize行去插入一个分页符，第二页以后的所有内容，都去复制第一页的 numberOfPages 决定要插入多少页
+        /// </summary>
+        /// <param name="inputFilePath"></param>
+        /// <param name="outputFilePath"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="numberOfPages"></param>
+        /// <param name="dataSource">数据源</param>
+        public static void AddPageBreaks(string inputFilePath, string outputFilePath, int pageSize, int numberOfPages)
+        {
+            IWorkbook workbook;
+            // 打开一个文件流来读取Excel文件
+            using (FileStream file = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
+            {
+                // 根据文件扩展名决定使用哪个类来处理Excel文件
+                if (Path.GetExtension(inputFilePath).ToLower() == ".xlsx")
+                    workbook = new XSSFWorkbook(file);
+                else
+                    workbook = new HSSFWorkbook(file);
+            }
+
+            // 获取Excel文件的第一个工作表
+            ISheet sheet = workbook.GetSheetAt(0);
+
+            // 设置每页的行数
+            int rowsPerPage = pageSize;
+
+            // 循环添加分页符并复制内容
+            for (int i = 1; i < numberOfPages; i++)
+            {
+                // 计算分页符的位置
+                int pageBreakRow = i * rowsPerPage - 1;
+                // 在计算出的行上方添加分页符
+                sheet.SetRowBreak(pageBreakRow);
+
+                // 复制第一页的内容到新的一页
+                for (int j = 0; j < rowsPerPage; j++)
+                {
+                    // 获取源行
+                    IRow sourceRow = sheet.GetRow(j);
+                    // 创建新的目标行
+                    IRow targetRow = sheet.CreateRow(pageBreakRow + 1 + j);
+                    // 复制源行到目标行
+                    CopyRow(workbook, sourceRow, targetRow);
+                }
+            }
+
+            // 创建一个文件流来写入修改后的Excel文件
+            using (FileStream outFile = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
+            {
+                // 将工作簿的内容写入文件流，即保存文件
+                workbook.Write(outFile);
+            }
+
+            // 打开保存后的文件，前提是系统关联了Excel程序来打开.xls文件
+           // System.Diagnostics.Process.Start(outputFilePath);
+        }
+
+        // 用于复制行的函数
+        private static void CopyRow(IWorkbook workbook, IRow sourceRow, IRow targetRow)
+        {
+            // 确保源行和目标行都不为空
+            if ((sourceRow != null) && (targetRow != null))
+            {
+                // 设置目标行的高度与源行相同
+                targetRow.Height = sourceRow.Height;
+                // 遍历源行的所有单元格
+                for (int i = 0; i < sourceRow.LastCellNum; i++)
+                {
+                    // 获取源单元格
+                    ICell sourceCell = sourceRow.GetCell(i);
+                    // 创建目标单元格
+                    ICell targetCell = targetRow.CreateCell(i);
+
+                    // 如果源单元格不为空，则复制内容和样式到目标单元格
+                    if (sourceCell != null)
+                    {
+                        // 复制样式
+                        targetCell.CellStyle = sourceCell.CellStyle;
+
+                        // 复制注释（如果有）
+                        if (sourceCell.CellComment != null)
+                        {
+                            targetCell.CellComment = sourceCell.CellComment;
+                        }
+
+                        // 复制超链接（如果有）
+                        if (sourceCell.Hyperlink != null)
+                        {
+                            targetCell.Hyperlink = sourceCell.Hyperlink;
+                        }
+
+                        // 根据单元格类型复制值
+                        switch (sourceCell.CellType)
+                        {
+                            case CellType.Blank:
+                                targetCell.SetCellValue(sourceCell.StringCellValue);
+                                break;
+                            case CellType.Boolean:
+                                targetCell.SetCellValue(sourceCell.BooleanCellValue);
+                                break;
+                            case CellType.Error:
+                                targetCell.SetCellErrorValue(sourceCell.ErrorCellValue);
+                                break;
+                            case CellType.Formula:
+                                targetCell.SetCellFormula(sourceCell.CellFormula);
+                                break;
+                            case CellType.Numeric:
+                                targetCell.SetCellValue(sourceCell.NumericCellValue);
+                                break;
+                            case CellType.String:
+                                targetCell.SetCellValue(sourceCell.RichStringCellValue);
+                                break;
+                        }
+                    }
+                }
+            }
+
+        }
+
+
+        public static void AddPageBreaks1(string inputFilePath, string outputFilePath, int pageSize, int numberOfPages)
+        {
+            IWorkbook workbook;
+            // 打开一个文件流来读取Excel文件
+            using (FileStream file = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
+            {
+                // 根据文件扩展名决定使用哪个类来处理Excel文件
+                if (Path.GetExtension(inputFilePath).ToLower() == ".xlsx")
+                    workbook = new XSSFWorkbook(file);
+                else
+                    workbook = new HSSFWorkbook(file);
+            }
+
+            // 获取Excel文件的第一个工作表
+            ISheet sheet = workbook.GetSheetAt(0);
+
+            // 设置每页的行数
+            int rowsPerPage = pageSize;
+
+            // 循环复制内容并添加分页符
+            for (int i = 1; i < numberOfPages; i++)
+            {
+                // 计算分页符的位置，即每一页结束的地方
+                int pageBreakRow = i * rowsPerPage - 1;
+                // 在该位置添加分页符
+                sheet.SetRowBreak(pageBreakRow);
+
+                // 计算新一页内容开始的行号
+                int startRow = pageBreakRow + 1;
+
+                // 复制第一页的内容到新的一页
+                for (int j = 0; j < rowsPerPage; j++)
+                {
+                    // 获取源行，即第一页的行
+                    IRow sourceRow = sheet.GetRow(j);
+                    // 检查是否超出了工作表的现有行数，如果是，则创建新行
+                    IRow targetRow = sheet.GetRow(startRow + j) ?? sheet.CreateRow(startRow + j);
+                    // 调用复制行的方法来复制源行到目标行
+                    CopyRow(workbook, sourceRow, targetRow);
+                }
+            }
+
+          
+
+            // 打开保存后的文件，前提是系统关联了Excel程序来打开.xls文件
+            // System.Diagnostics.Process.Start(outputFilePath);
+        }
+
+
     }
 }

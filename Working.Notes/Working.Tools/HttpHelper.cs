@@ -1,6 +1,9 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra.Factorization;
+using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,6 +40,36 @@ namespace Working.Tools
                     return null;
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Http 请求
+        /// </summary>
+        /// <param name="baseUrl">目标地址</param>
+        /// <param name="method">请求类型</param>
+        /// <param name="requestBody">body参数</param>
+        /// <returns></returns>
+        public static string HttpRequest(string baseUrl, Method method, RestRequest requestBody)
+        {
+            try
+            {
+                var client = new RestClient(baseUrl);
+               
+                requestBody.Method = method;
+                var response = client.Execute(requestBody);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return response.Content;
+                }
+
+                throw new Exception("HTTP request result error ." + response.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("HTTP request failed ." + ex.Message);
+            }
+
         }
     }
 }
