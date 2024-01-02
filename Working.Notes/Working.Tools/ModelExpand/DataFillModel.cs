@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Working.Tools.AttributeExpand;
-
-namespace Working.Tools.ModelExpand
+﻿namespace Working.Tools.ModelExpand
 {
     public class DataFillModel
     {
